@@ -16,6 +16,19 @@ spring:
       host: localhost
       port: 6379
 
+  # oauth2Login 은 ClientRegistrationRepository 빈을 요구한다.
+  # 등록이 하나도 없으면 빈이 만들어지지 않아 컨텍스트 로딩이 실패한다.
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope:
+              - profile
+              - email
+
 getit:
   cors:
     allowed-origins:
@@ -26,6 +39,10 @@ getit:
     secret: test-secret-key-for-getit-authentication-only-do-not-use-in-production
     access-token-validity: 30m
     refresh-token-validity: 14d
+
+  auth:
+    oauth2-redirect-uri: http://localhost:5173/oauth/callback
+    refresh-cookie-secure: false
 
 logging:
   level:
