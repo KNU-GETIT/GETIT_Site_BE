@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,11 +66,17 @@ public class User extends SoftDeletableEntity {
   @Column
   private Integer generationNo;
 
+  /**
+   * Hibernate 6 은 Java enum 을 MySQL 네이티브 ENUM 타입으로 매핑한다.
+   * 그러면 값을 추가할 때마다 ALTER TABLE 이 필요하므로 varchar 로 고정한다.
+   */
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, length = 20)
   private Role role;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, length = 20)
   private UserStatus status;
 
