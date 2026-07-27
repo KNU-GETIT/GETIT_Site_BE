@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: getit
+  profiles:
+    default: local
+
+  jackson:
+    time-zone: Asia/Seoul
+    serialization:
+      write-dates-as-timestamps: false
+    # null 을 전역으로 생략하지 않는다. 명세서가 null 자체를 의미 있는 값으로 쓴다.
+    # (totalScore: null → "미평가", answerText: null → "답변 없음", mySubmission: null → 미제출)
+    default-property-inclusion: always
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+        jdbc:
+          time_zone: Asia/Seoul
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+  default-produces-media-type: application/json
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+getit:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:5173

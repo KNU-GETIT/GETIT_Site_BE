@@ -1,0 +1,23 @@
+# 로컬 개발용. docker-compose up -d 로 MySQL · Redis 를 띄운 뒤 사용한다.
+spring:
+  datasource:
+    # 포트 3307 — docker-compose 가 호스트 3307 로 매핑한다 (로컬 MySQL 과의 충돌 회피)
+    url: jdbc:mysql://localhost:3307/getit?characterEncoding=UTF-8&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
+    username: getit
+    password: getit
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    com.getit: debug
+    org.hibernate.orm.jdbc.bind: trace
