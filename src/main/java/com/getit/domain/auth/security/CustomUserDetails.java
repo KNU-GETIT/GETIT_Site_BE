@@ -1,7 +1,6 @@
 package com.getit.domain.auth.security;
 
 import com.getit.domain.user.entity.Role;
-import com.getit.domain.user.entity.User;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
@@ -26,10 +25,6 @@ public class CustomUserDetails implements UserDetails {
     this.userId = userId;
     this.email = email;
     this.role = role;
-  }
-
-  public static CustomUserDetails from(User user) {
-    return new CustomUserDetails(user.getId(), user.getEmail(), user.getRole());
   }
 
   @Override

@@ -1,7 +1,7 @@
 package com.getit.domain.auth.dto;
 
+import com.getit.domain.user.dto.UserAccount;
 import com.getit.domain.user.entity.Role;
-import com.getit.domain.user.entity.User;
 import com.getit.domain.user.entity.UserStatus;
 
 /**
@@ -27,20 +27,20 @@ public record MeResponse(
     UserStatus status
 ) {
 
-  public static MeResponse from(User user) {
+  public static MeResponse from(UserAccount account) {
     return new MeResponse(
-        user.getId(),
-        user.getEmail(),
-        user.getName(),
-        user.getPhoneNumber(),
-        user.getCollege(),
-        user.getMajor(),
-        user.getStudentYear(),
-        user.getStudentNumber(),
-        user.getProfileImageUrl(),
-        user.getRole(),
-        user.getGenerationNo(),
-        user.getStatus()
+        account.id(),
+        account.email(),
+        account.name(),
+        account.phoneNumber(),
+        account.college(),
+        account.major(),
+        account.studentYear(),
+        account.studentNumber(),
+        account.profileImageUrl(),
+        account.role(),
+        account.generationNo(),
+        account.status()
     );
   }
 }
