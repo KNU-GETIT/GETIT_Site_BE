@@ -1,0 +1,84 @@
+plugins {
+  id 'java'
+  id 'org.springframework.boot' version '3.5.16'
+  id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.getit'
+version = '0.0.1-SNAPSHOT'
+description = 'GETIT 동아리 통합 사이트 백엔드'
+
+// 로컬 JDK 버전과 무관하게 21로 컴파일한다. 설치돼 있지 않으면 Gradle이 자동으로 받아온다.
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
+
+configurations {
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  springdocVersion = '2.8.17'
+  jjwtVersion = '0.13.0'
+  poiVersion = '5.5.1'
+  awsSdkVersion = '2.49.3'
+}
+
+dependencies {
+  // --- web / persistence / validation -------------------------------------
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+  // --- security (auth 작업에서 사용, 현재는 골격만) ---------------------------
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+  implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+  runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+  runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+
+  // --- refresh token 저장소 -------------------------------------------------
+  implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+  // --- API 문서 -------------------------------------------------------------
+  implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+  // --- 엑셀 다운로드 (user, recruitment) --------------------------------------
+  implementation "org.apache.poi:poi-ooxml:${poiVersion}"
+
+  // --- 파일 저장소 (file) -----------------------------------------------------
+  implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+  implementation 'software.amazon.awssdk:s3'
+
+  // --- lombok ---------------------------------------------------------------
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+  testCompileOnly 'org.projectlombok:lombok'
+  testAnnotationProcessor 'org.projectlombok:lombok'
+
+  // --- db -------------------------------------------------------------------
+  runtimeOnly 'com.mysql:mysql-connector-j'
+  testRuntimeOnly 'com.h2database:h2'
+
+  // --- test -----------------------------------------------------------------
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.security:spring-security-test'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+  useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+  options.encoding = 'UTF-8'
+  options.compilerArgs << '-parameters'
+}
