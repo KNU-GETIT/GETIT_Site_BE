@@ -20,6 +20,7 @@ GETIT 동아리 통합 사이트 백엔드. 공개 사이트 · 부원 LMS · �
 ## 시작하기
 
 ```bash
+cp .env.example .env          # 값을 채운다. .env 는 커밋하지 않는다
 docker compose up -d          # MySQL · Redis 기동
 ./gradlew bootRun             # 기본 프로파일 = local
 ```
@@ -33,6 +34,18 @@ docker compose up -d          # MySQL · Redis 기동
 ./gradlew test                # 테스트 (외부 인프라 불필요, H2 사용)
 ./gradlew build               # 빌드 + 테스트
 ```
+
+### 환경변수 (.env)
+
+DB 계정 등 자격증명은 **저장소에 커밋하지 않는다.** `.env.example` 을 복사해 각자 `.env` 를 만든다.
+
+| 환경 | 값을 읽는 곳 |
+|---|---|
+| local | `.env` — docker compose 가 직접 읽고, 애플리케이션은 `spring.config.import` 로 읽는다 |
+| dev · prod | 실제 환경변수 (GitHub Actions Secrets · 서버 환경변수) |
+
+`.env` 가 없으면 `Config data resource 'file [.env]' ... does not exist` 로 즉시 실패한다.
+테스트는 H2 를 쓰므로 `.env` 없이도 돌아간다 (CI 가 이 경로를 쓴다).
 
 ## 패키지 구조
 
@@ -115,6 +128,18 @@ PR       500줄 이하. 교차 리뷰 1 approve 로 머지. main 직접 push 금
 ```
 
 Branch type: `feat` · `fix` · `refactor` · `chore` — 1 Issue 1 Branch, PR 본문에 `close #이슈번호`.
+
+이슈 · PR 템플릿은 `.github/` 에 있다. 이슈를 만들면 종류에 맞는 양식이 자동으로 뜬다.
+
+## CI
+
+`main` 으로의 push · PR 마다 `.github/workflows/ci.yml` 이 돈다.
+
+1. `.env` 가 커밋되지 않았는지 확인
+2. JDK 21 설치 후 `./gradlew build` (테스트는 H2 라 컨테이너 불필요)
+3. 실패 시 테스트 리포트를 아티팩트로 업로드
+
+`main` 브랜치 보호 규칙에서 이 체크를 필수로 걸어두면 깨진 코드가 머지되지 않는다.
 
 ## 현재 상태
 
