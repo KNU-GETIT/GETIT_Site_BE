@@ -1,0 +1,52 @@
+name: 버그 리포트
+description: 동작하지 않거나 명세와 다르게 동작하는 부분
+title: "[Fix] "
+labels: ["fix"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 증상
+      description: 무엇이 잘못 동작하는지 적습니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 재현 방법
+      description: 요청한 엔드포인트와 파라미터를 그대로 적어주면 가장 빠릅니다.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 동작
+      description: 명세서 기준으로 어떻게 동작해야 하는지 적습니다. 명세서 번호가 있으면 함께 적어주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작
+      description: 응답 body, 에러 코드, 스택트레이스 등을 붙입니다.
+      render: shell
+    validations:
+      required: false
+
+  - type: dropdown
+    id: env
+    attributes:
+      label: 발생 환경
+      options:
+        - local
+        - dev
+        - prod
+    validations:
+      required: true

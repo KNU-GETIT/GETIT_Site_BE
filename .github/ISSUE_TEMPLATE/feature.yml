@@ -1,0 +1,65 @@
+name: 기능 개발
+description: API 구현 등 새로운 기능 작업
+title: "[Feat] "
+labels: ["feat"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        1 Issue - 1 Branch 입니다. 이슈 생성 후 `feat/{이슈번호}-{작업내용}` 브랜치를 만드세요.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 작업 내용
+      description: 무엇을 만드는지 한두 줄로 적습니다.
+      placeholder: 지원서 임시저장 API 를 구현한다.
+    validations:
+      required: true
+
+  - type: input
+    id: spec
+    attributes:
+      label: 명세서 항목
+      description: API 명세서의 번호와 엔드포인트를 적습니다.
+      placeholder: "3.3 PUT /applications/me/draft"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: 도메인
+      description: 작업할 패키지입니다. 자기 소유 패키지가 아니면 소유자에게 요청하세요.
+      options:
+        - global
+        - auth
+        - user
+        - recruitment
+        - dashboard
+        - setting
+        - lecture
+        - qna
+        - project
+        - file
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: 세부 작업
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: false
+
+  - type: textarea
+    id: note
+    attributes:
+      label: 참고 · 논의 필요 사항
+      description: 명세서에 미확정으로 남아 있는 항목이나 다른 도메인과의 의존이 있으면 적습니다.
+      placeholder: 복수 평가자 정책이 미확정이라 단일 평가자 기준으로 우선 구현합니다.
+    validations:
+      required: false

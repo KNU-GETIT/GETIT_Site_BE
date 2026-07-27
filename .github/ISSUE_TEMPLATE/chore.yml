@@ -1,0 +1,38 @@
+name: 리팩토링 · 기타 작업
+description: 기능 변경 없는 구조 개선, 빌드 · 문서 · 설정 작업
+title: "[Chore] "
+labels: ["chore"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 작업 종류
+      options:
+        - refactor (기능 변경 없는 구조 개선)
+        - chore (빌드 · 설정 · 문서)
+        - test (테스트 추가 · 보강)
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 작업 내용
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 이유
+      description: 왜 지금 해야 하는지 적습니다. 리팩토링이면 현재 구조의 어떤 점이 문제인지 적어주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 영향 범위
+      description: 다른 사람 소유 패키지를 건드려야 하면 반드시 적고 소유자를 멘션합니다.
+    validations:
+      required: false
