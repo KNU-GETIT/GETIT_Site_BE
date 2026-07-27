@@ -1,5 +1,10 @@
 # 운영 환경. 스키마 변경은 마이그레이션으로만 반영하므로 ddl-auto 는 validate 로 고정한다.
 spring:
+  # 스키마 변경은 마이그레이션으로만 반영한다. ddl-auto 는 validate 로 고정.
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
     username: ${DB_USERNAME}
