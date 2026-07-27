@@ -1,15 +1,17 @@
+# 자격증명은 전부 .env 에서 읽는다. .env 가 없으면 아래 :? 로 즉시 실패한다.
+#   cp .env.example .env
 services:
   mysql:
     image: mysql:8.4
     container_name: getit-mysql
     ports:
-      # 로컬에 MySQL 이 이미 깔려 있는 경우와 충돌하지 않도록 호스트는 3307 을 쓴다.
-      - "3307:3306"
+      # 로컬에 MySQL 이 이미 깔려 있는 경우와 충돌하지 않도록 호스트 포트는 .env 에서 지정한다.
+      - "${DB_PORT:-3307}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: getit
-      MYSQL_USER: getit
-      MYSQL_PASSWORD: getit
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?.env 가 없습니다. cp .env.example .env 후 값을 채우세요}
+      MYSQL_DATABASE: ${DB_NAME:-getit}
+      MYSQL_USER: ${DB_USERNAME:?.env 가 없습니다. cp .env.example .env 후 값을 채우세요}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?.env 가 없습니다. cp .env.example .env 후 값을 채우세요}
       TZ: Asia/Seoul
     command:
       - --character-set-server=utf8mb4
@@ -17,7 +19,7 @@ services:
     volumes:
       - getit-mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -26,7 +28,7 @@ services:
     image: redis:7-alpine
     container_name: getit-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - getit-redis-data:/data

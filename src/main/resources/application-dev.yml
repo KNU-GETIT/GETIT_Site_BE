@@ -1,7 +1,7 @@
-# dev 배포 환경. 값은 전부 환경변수로 주입한다.
+# dev 배포 환경. 값은 전부 환경변수로 주입한다 (GitHub Actions Secrets / 서버 환경변수).
 spring:
   datasource:
-    url: ${DB_URL}
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver

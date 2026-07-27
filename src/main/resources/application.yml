@@ -4,6 +4,7 @@ spring:
   profiles:
     default: local
 
+
   jackson:
     time-zone: Asia/Seoul
     serialization:
@@ -42,6 +43,4 @@ server:
 
 getit:
   cors:
-    allowed-origins:
-      - http://localhost:3000
-      - http://localhost:5173
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
