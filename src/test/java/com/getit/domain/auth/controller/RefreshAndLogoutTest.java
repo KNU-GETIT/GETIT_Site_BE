@@ -122,11 +122,7 @@ class RefreshAndLogoutTest {
   @Test
   @DisplayName("로그아웃하면 204 와 함께 쿠키가 만료된다")
   void logoutExpiresCookie() throws Exception {
-    String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole());
-
-    MvcResult result = mockMvc.perform(post(LOGOUT_PATH)
-            .header("Authorization", "Bearer " + accessToken)
-            .cookie(refreshCookie(refreshToken)))
+    MvcResult result = mockMvc.perform(post(LOGOUT_PATH).cookie(refreshCookie(refreshToken)))
         .andExpect(status().isNoContent())
         .andReturn();
 
@@ -136,11 +132,7 @@ class RefreshAndLogoutTest {
   @Test
   @DisplayName("로그아웃한 토큰으로는 재발급할 수 없다")
   void cannotRefreshAfterLogout() throws Exception {
-    String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole());
-
-    mockMvc.perform(post(LOGOUT_PATH)
-            .header("Authorization", "Bearer " + accessToken)
-            .cookie(refreshCookie(refreshToken)))
+    mockMvc.perform(post(LOGOUT_PATH).cookie(refreshCookie(refreshToken)))
         .andExpect(status().isNoContent());
 
     mockMvc.perform(post(REFRESH_PATH).cookie(refreshCookie(refreshToken)))
@@ -148,9 +140,16 @@ class RefreshAndLogoutTest {
   }
 
   @Test
-  @DisplayName("로그아웃은 인증이 필요하다 (명세서 1.4)")
-  void logoutRequiresAuthentication() throws Exception {
+  @DisplayName("Access Token 이 만료돼도 로그아웃할 수 있다")
+  void logoutDoesNotRequireAccessToken() throws Exception {
+    // 인증을 요구하면 만료된 사용자가 로그아웃을 못 해 Refresh 가 최대 2주 살아남는다.
     mockMvc.perform(post(LOGOUT_PATH).cookie(refreshCookie(refreshToken)))
-        .andExpect(status().isUnauthorized());
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @DisplayName("쿠키 없이 로그아웃해도 204 다")
+  void logoutWithoutCookieSucceeds() throws Exception {
+    mockMvc.perform(post(LOGOUT_PATH)).andExpect(status().isNoContent());
   }
 }

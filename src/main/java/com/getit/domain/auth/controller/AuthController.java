@@ -70,7 +70,14 @@ public class AuthController {
     );
   }
 
-  /** 로그아웃. (명세서 1.4) 쿠키가 없어도 성공으로 처리한다. 이미 로그아웃된 상태와 구분할 필요가 없다. */
+  /**
+   * 로그아웃. (명세서 1.4)
+   *
+   * <p>인증을 요구하지 않는다. 자기가 이미 가진 Refresh 쿠키를 폐기하는 것뿐이고,
+   * 요구하면 Access Token 이 만료된 사용자가 로그아웃을 못 해 Refresh 가 최대 2주 살아남는다.
+   *
+   * <p>쿠키가 없어도 성공으로 처리한다. 이미 로그아웃된 상태와 구분할 필요가 없다.
+   */
   @Operation(summary = "로그아웃", description = "명세서 1.4")
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -38,8 +38,10 @@ public class SecurityConfig {
       "/api/public/**",
       // OAuth2 로그인 리다이렉트와 콜백 (명세서 1.1 · 1.2)
       "/oauth2/**", "/login/oauth2/**",
-      // 토큰 재발급은 Access Token 이 만료된 상태에서 호출된다 (명세서 1.3)
-      "/api/auth/refresh", "/api/auth/callback"
+      // 토큰 재발급과 로그아웃은 Access Token 이 만료된 상태에서도 호출된다 (명세서 1.3 · 1.4).
+      // 로그아웃은 자기가 이미 가진 Refresh 쿠키를 폐기하는 것뿐이라 열어도 안전하다.
+      // 인증을 요구하면 만료된 사용자가 로그아웃을 못 해 Refresh 가 최대 2주 살아남는다.
+      "/api/auth/refresh", "/api/auth/logout", "/api/auth/callback"
   };
 
   private static final String[] DOCS_ENDPOINTS = {
