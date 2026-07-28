@@ -25,7 +25,7 @@ close #
 - [ ] 응답을 `ApiResponse` envelope 으로 감쌌다
 - [ ] 도메인 `ErrorCode` enum 에 에러 코드를 정의했다 (`CommonErrorCode` 에 추가하지 않았다)
 - [ ] `./gradlew build` 가 통과한다
-- [ ] 변경 라인이 500줄 이하다 (넘으면 쪼갠다)
+- [ ] **프로덕션 코드** 변경이 500줄 이하다 (테스트는 세지 않는다. 넘으면 쪼갠다)
 - [ ] 커밋 메시지가 컨벤션을 따른다 (`feat(recruitment): ...`)
 
 ## 다른 사람 소유 파일을 건드렸다면
