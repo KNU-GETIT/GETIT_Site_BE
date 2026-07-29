@@ -36,7 +36,7 @@ public class SecurityConfig {
       // OAuth2 로그인 리다이렉트와 콜백 (명세서 1.1 · 1.2)
       "/oauth2/**", "/login/oauth2/**",
       // 토큰 재발급은 Access Token 이 만료된 상태에서 호출된다 (명세서 1.3)
-      "/api/auth/refresh", "/api/auth/callback", "/api/auth/dev-login"
+      "/api/auth/refresh", "/api/auth/callback"
   };
 
   private static final String[] DOCS_ENDPOINTS = {
