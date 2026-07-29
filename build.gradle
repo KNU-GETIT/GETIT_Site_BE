@@ -68,6 +68,11 @@ dependencies {
   runtimeOnly 'com.mysql:mysql-connector-j'
   testRuntimeOnly 'com.h2database:h2'
 
+  // --- 스키마 마이그레이션 (dev · prod) ----------------------------------------
+  // local 은 ddl-auto: update 를 쓰므로 기동해도 마이그레이션이 돌지 않는다.
+  implementation 'org.flywaydb:flyway-core'
+  runtimeOnly 'org.flywaydb:flyway-mysql'
+
   // --- test -----------------------------------------------------------------
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
@@ -75,7 +80,33 @@ dependencies {
 }
 
 tasks.named('test') {
-  useJUnitPlatform()
+  // 스키마 검증은 MySQL 이 필요하다. 기본 test 는 H2 만 쓰므로 제외한다.
+  useJUnitPlatform {
+    excludeTags 'schema'
+  }
+}
+
+/**
+ * 마이그레이션과 엔티티가 어긋나지 않는지 실제 MySQL 로 검증한다.
+ * 빈 DB 에 Flyway 를 돌린 뒤 ddl-auto: validate 로 확인한다.
+ *
+ * 로컬 실행: docker compose up -d 후 ./gradlew schemaTest
+ */
+tasks.register('schemaTest', Test) {
+  description = '실제 MySQL 로 마이그레이션 ↔ 엔티티 일치를 검증한다.'
+  group = 'verification'
+
+  testClassesDirs = sourceSets.test.output.classesDirs
+  classpath = sourceSets.test.runtimeClasspath
+
+  useJUnitPlatform {
+    includeTags 'schema'
+  }
+
+  systemProperty 'schema.test.url', System.getenv('SCHEMA_TEST_DB_URL')
+      ?: 'jdbc:mysql://localhost:3307/getit_schema_test?characterEncoding=UTF-8&serverTimezone=Asia/Seoul'
+  systemProperty 'schema.test.username', System.getenv('SCHEMA_TEST_DB_USERNAME') ?: 'getit'
+  systemProperty 'schema.test.password', System.getenv('SCHEMA_TEST_DB_PASSWORD') ?: 'getit'
 }
 
 tasks.withType(JavaCompile).configureEach {

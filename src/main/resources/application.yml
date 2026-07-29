@@ -13,6 +13,11 @@ spring:
     # (totalScore: null → "미평가", answerText: null → "답변 없음", mySubmission: null → 미제출)
     default-property-inclusion: always
 
+  # 스키마는 dev · prod 에서만 마이그레이션으로 관리한다.
+  # local 은 ddl-auto: update 로 두어 엔티티 설계 중 반복 속도를 유지한다.
+  flyway:
+    enabled: false
+
   jpa:
     open-in-view: false
     properties:
