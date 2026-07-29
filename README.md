@@ -124,10 +124,21 @@ public enum RecruitmentErrorCode implements ErrorCode { ... }
 ```
 브랜치   feat/{이슈번호}-{작업내용}     예) feat/12-application-submit
 커밋     feat(recruitment): 지원서 임시저장 API 구현
-PR       500줄 이하. 교차 리뷰 1 approve 로 머지. main 직접 push 금지
+PR       프로덕션 500줄 이하. 교차 리뷰 1 approve 로 머지. main 직접 push 금지
 ```
 
 Branch type: `feat` · `fix` · `refactor` · `chore` — 1 Issue 1 Branch, PR 본문에 `close #이슈번호`.
+
+### PR 크기
+
+**프로덕션 코드 500줄 이하.** 테스트는 세지 않는다.
+
+리뷰 부하는 프로덕션 코드에서 나오고, 테스트는 오히려 리뷰를 쉽게 만든다.
+전체 변경으로 세면 테스트를 줄일 유인이 생겨 규약이 거꾸로 작동한다.
+
+```bash
+git diff --numstat main...HEAD -- src/main | awk '{s+=$1} END {print s" 줄"}'
+```
 
 이슈 · PR 템플릿은 `.github/` 에 있다. 이슈를 만들면 종류에 맞는 양식이 자동으로 뜬다.
 
