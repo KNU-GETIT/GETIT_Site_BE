@@ -1,81 +1,78 @@
 package com.getit.global.config;
 
+import com.getit.domain.auth.jwt.JwtAuthenticationFilter;
+import com.getit.domain.auth.security.JwtAccessDeniedHandler;
+import com.getit.domain.auth.security.JwtAuthenticationEntryPoint;
+import com.getit.domain.user.entity.Role;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * ⚠️ 임시 설정입니다. auth 작업(R 담당)에서 이 파일을 교체합니다.
+ * URL 기반 인가 + JWT 인증. (설계 명세서 1.1 · API 명세서 0.1)
  *
- * <p>아직 JWT 필터도 OAuth2 로그인도 없으므로 권한 판정을 할 수 없습니다.
- * 그래서 prod 외 프로파일에서는 전 경로를 열어 A/B 가 각자 API 를 바로 테스트할 수 있게 하고,
- * prod 에서만 /api/public/** 을 제외한 전 경로에 인증을 요구합니다.
- * (인증 수단이 없으므로 실질적으로 401 — 인증 미구현 상태의 배포를 막기 위한 안전장치)
+ * <p>URL 규칙과 {@code @PreAuthorize} 메서드 시큐리티로 이중 방어한다.
+ * 본인 리소스 접근(과제 제출물 · 지원서 · 파일)은 서비스 레이어에서 소유자를 검증한다.
  *
- * <p>auth 구현 시 할 일 (설계 명세서 1.1):
- * <pre>
- * - /api/admin/**  → hasRole('ADMIN')
- * - /api/member/** → hasAnyRole('MEMBER','ADMIN')
- * - /api/public/** → permitAll
- * - JwtAuthenticationFilter 를 UsernamePasswordAuthenticationFilter 앞에 등록
- * - @PreAuthorize 메서드 시큐리티로 이중 방어
- * </pre>
- *
- * <p>본 파일과 application.yml 은 R 소유입니다. 경로 규칙 추가가 필요하면 R 에게 요청하세요.
+ * <p>이 파일과 application.yml 은 R 소유다. 경로 규칙 추가가 필요하면 R 에게 요청한다.
  * (작업 분할 계획 4.1)
  */
-@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private static final String[] DOCS_WHITELIST = {
+  /** 인증 없이 열어두는 경로. */
+  private static final String[] PUBLIC_ENDPOINTS = {
+      "/api/public/**",
+      // OAuth2 로그인 리다이렉트와 콜백 (명세서 1.1 · 1.2)
+      "/oauth2/**", "/login/oauth2/**",
+      // 토큰 재발급은 Access Token 이 만료된 상태에서 호출된다 (명세서 1.3)
+      "/api/auth/refresh", "/api/auth/callback", "/api/auth/dev-login"
+  };
+
+  private static final String[] DOCS_ENDPOINTS = {
       "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
   };
 
   private final CorsConfigurationSource corsConfigurationSource;
-  private final Environment environment;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private final JwtAccessDeniedHandler accessDeniedHandler;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    boolean isProd = environment.matchesProfiles("prod");
-
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(csrf -> csrf.disable())
         .formLogin(formLogin -> formLogin.disable())
         .httpBasic(httpBasic -> httpBasic.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-    if (isProd) {
-      log.warn("[SecurityConfig] 인증이 아직 구현되지 않았습니다. prod 에서는 /api/public/** 외 모든 요청이 401 입니다.");
-      http.authorizeHttpRequests(auth -> auth
-          .requestMatchers("/api/public/**").permitAll()
-          .anyRequest().authenticated());
-    } else {
-      log.warn("[SecurityConfig] ⚠️ 임시 permitAll 상태입니다 (profile={}). auth 구현 시 반드시 교체하세요.",
-          String.join(",", currentProfiles()));
-      http.authorizeHttpRequests(auth -> auth
-          .requestMatchers(DOCS_WHITELIST).permitAll()
-          .anyRequest().permitAll());
-    }
+        .exceptionHandling(handling -> handling
+            .authenticationEntryPoint(authenticationEntryPoint)
+            .accessDeniedHandler(accessDeniedHandler))
+
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(DOCS_ENDPOINTS).permitAll()
+            .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+            // 지원서는 GUEST 도 쓴다. 인증만 확인한다
+            .requestMatchers("/api/applications/**").authenticated()
+            .requestMatchers("/api/member/**").hasAnyRole(Role.MEMBER.name(), Role.ADMIN.name())
+            .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+            .requestMatchers("/api/files/**").authenticated()
+            .anyRequest().authenticated())
+
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
-  }
-
-  /** active profile 이 비어 있으면 default profile(local) 이 적용된 상태다. */
-  private String[] currentProfiles() {
-    String[] active = environment.getActiveProfiles();
-    return active.length > 0 ? active : environment.getDefaultProfiles();
   }
 }

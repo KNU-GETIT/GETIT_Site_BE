@@ -44,3 +44,9 @@ server:
 getit:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+  jwt:
+    # 시크릿은 커밋하지 않는다. .env 의 JWT_SECRET 에서 주입받는다.
+    secret: ${JWT_SECRET}
+    access-token-validity: 30m
+    refresh-token-validity: 14d
