@@ -1,6 +1,8 @@
 package com.getit.global.schema;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import javax.sql.DataSource;
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -59,6 +62,36 @@ class SchemaMigrationTest {
         "select count(*) from flyway_schema_history where success = true", Integer.class);
 
     assertThat(applied).isNotNull().isPositive();
+  }
+
+  @Test
+  @DisplayName("학번 형식이 DB 에서 강제된다")
+  void studentNumberFormatIsEnforced() {
+    JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+    jdbc.update("delete from users where email = 'ck-probe@getit.com'");
+
+    String insert = """
+        insert into users
+          (email, provider_id, name, student_number, role, status, created_at, updated_at)
+        values ('ck-probe@getit.com', 'ck-probe', '김학번', ?, 'GUEST', 'ACTIVE', now(6), now(6))
+        """;
+
+    // char(10) 만으로는 'abc' 도 '' 도 그대로 들어간다. CHECK 제약이 이를 막는다.
+    //
+    // Spring 은 MySQL 의 CHECK 위반(3819)을 DataIntegrityViolationException 으로 변환하지 않고
+    // UncategorizedSQLException 으로 남긴다. 타입 대신 제약 이름으로 확인한다.
+    for (String invalid : new String[] {"abc", "12345", "20211100AB"}) {
+      assertThatThrownBy(() -> jdbc.update(insert, invalid))
+          .isInstanceOf(DataAccessException.class)
+          .hasMessageContaining("ck_users_student_number");
+    }
+
+    assertThatCode(() -> jdbc.update(insert, "2021110000")).doesNotThrowAnyException();
+    jdbc.update("delete from users where email = 'ck-probe@getit.com'");
+
+    // 지원서를 내기 전 GUEST 는 학번이 비어 있다. NULL 은 허용해야 한다.
+    assertThatCode(() -> jdbc.update(insert, (Object) null)).doesNotThrowAnyException();
+    jdbc.update("delete from users where email = 'ck-probe@getit.com'");
   }
 
   @Test

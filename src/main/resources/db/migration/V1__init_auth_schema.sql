@@ -17,7 +17,7 @@ CREATE TABLE users
     college           varchar(50)  DEFAULT NULL,
     major             varchar(50)  DEFAULT NULL,
     student_year      int          DEFAULT NULL,
-    -- 학번. 년도 4자리 + 고유번호 6자리
+    -- 학번. 년도 4자리 + 고유번호 6자리. 지원서 기본 정보에서 수집한다
     student_number    char(10)     DEFAULT NULL,
     profile_image_url varchar(512) DEFAULT NULL,
     -- 소속 기수. GUEST 는 아직 소속이 없으므로 NULL
@@ -36,7 +36,13 @@ CREATE TABLE users
 
     PRIMARY KEY (id),
     UNIQUE KEY uk_users_email (email),
-    UNIQUE KEY uk_users_provider_id (provider_id)
+    UNIQUE KEY uk_users_provider_id (provider_id),
+
+    -- char(10) 은 길이를 강제하지 않는다. 'abc' 나 '' 도 그대로 저장된다.
+    -- 학번은 여러 화면에서 학생 식별에 쓰이므로 형식을 DB 에서도 막는다.
+    -- DTO 검증(@Pattern)은 잘못된 요청을 막고, 이 제약은 그 밖의 경로를 막는다.
+    CONSTRAINT ck_users_student_number
+        CHECK (student_number IS NULL OR student_number REGEXP '^[0-9]{10}$')
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

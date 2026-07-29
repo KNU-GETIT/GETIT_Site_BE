@@ -28,6 +28,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends SoftDeletableEntity {
 
+  /**
+   * 학번 형식. 년도 4자리 + 고유번호 6자리.
+   *
+   * <p>지원서 DTO 등 값을 입력받는 쪽에서 {@code @Pattern(regexp = User.STUDENT_NUMBER_PATTERN)} 으로
+   * 함께 쓴다. 각자 정규식을 만들면 화면마다 허용 형식이 달라진다.
+   */
+  public static final String STUDENT_NUMBER_PATTERN = "\\d{10}";
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -55,7 +63,12 @@ public class User extends SoftDeletableEntity {
   @Column
   private Integer studentYear;
 
-  /** 학번. 년도 4자리 + 고유번호 6자리. 형식 검증(\d{10})은 DTO 에서 한다. */
+  /**
+   * 학번. 년도 4자리 + 고유번호 6자리. 지원서 기본 정보에서 수집한다.
+   *
+   * <p>요청 값 검증은 DTO 에서 {@link #STUDENT_NUMBER_PATTERN} 으로 한다.
+   * DB 에도 CHECK 제약이 걸려 있다. char(10) 만으로는 길이도 형식도 강제되지 않기 때문이다.
+   */
   @Column(columnDefinition = "CHAR(10)")
   private String studentNumber;
 
@@ -121,8 +134,6 @@ public class User extends SoftDeletableEntity {
   /**
    * 지원서에서 수집한 정보를 반영한다. 합격자 승격 시 지원서 값을 User 로 복사하는 데 쓴다.
    * (9.4 POST /admin/users/promote)
-   *
-   * <p>⚠️ studentNumber 는 현재 지원서 양식(3.1)에 항목이 없어 채울 경로가 없다. 명세 확인 필요.
    */
   public void updateApplicantInfo(
       String phoneNumber,
