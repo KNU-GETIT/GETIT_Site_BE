@@ -4,9 +4,9 @@ import com.getit.domain.auth.entity.RefreshToken;
 import com.getit.domain.auth.exception.AuthErrorCode;
 import com.getit.domain.auth.jwt.JwtProvider;
 import com.getit.domain.auth.repository.RefreshTokenRepository;
-import com.getit.domain.user.entity.User;
+import com.getit.domain.user.dto.UserAccount;
 import com.getit.domain.user.exception.UserErrorCode;
-import com.getit.domain.user.repository.UserRepository;
+import com.getit.domain.user.service.UserAccountService;
 import com.getit.global.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService {
 
   private final RefreshTokenRepository refreshTokenRepository;
-  private final UserRepository userRepository;
+  private final UserAccountService userAccountService;
   private final JwtProvider jwtProvider;
 
   /** 로그인 성공 시 발급한다. */
@@ -65,15 +65,14 @@ public class RefreshTokenService {
     stored.revoke();
 
     Long userId = jwtProvider.getUserId(claims);
-    User user = userRepository.findById(userId)
-        .filter(found -> !found.isDeleted())
+    UserAccount user = userAccountService.findActiveById(userId)
         .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
 
     String newRefreshToken = jwtProvider.createRefreshToken(userId);
     store(newRefreshToken, userId);
 
     return new TokenPair(
-        jwtProvider.createAccessToken(user.getId(), user.getEmail(), user.getRole()),
+        jwtProvider.createAccessToken(user.id(), user.email(), user.role()),
         newRefreshToken,
         jwtProvider.getAccessTokenExpiresIn()
     );
