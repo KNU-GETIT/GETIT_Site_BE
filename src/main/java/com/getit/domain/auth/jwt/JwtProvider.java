@@ -11,13 +11,14 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
 /**
  * JWT 발급 · 파싱 · 검증. (API 명세서 0.1)
  *
- * <p>OAuth2 로그인과 dev 목 로그인이 모두 이 클래스를 통해 토큰을 만든다.
+ * <p>OAuth2 로그인과 토큰 재발급이 모두 이 클래스를 통해 토큰을 만든다.
  */
 @Component
 public class JwtProvider {
@@ -50,8 +51,16 @@ public class JwtProvider {
         .compact();
   }
 
+  /**
+   * Refresh Token 발급.
+   *
+   * <p>jti 를 넣어 매번 다른 토큰이 되도록 한다. iat · exp 는 초 단위라, 같은 사용자에게
+   * 같은 초에 두 번 발급하면 바이트 단위로 동일한 토큰이 나온다. 회전 직후 재발급이
+   * 바로 그 상황이고, 저장소의 해시 유니크 제약에 걸린다.
+   */
   public String createRefreshToken(Long userId) {
     return Jwts.builder()
+        .id(UUID.randomUUID().toString())
         .subject(String.valueOf(userId))
         .claim(CLAIM_TYPE, TYPE_REFRESH)
         .issuedAt(new Date())

@@ -2,6 +2,7 @@ package com.getit.domain.auth.oauth2;
 
 import com.getit.domain.auth.AuthProperties;
 import com.getit.domain.auth.jwt.JwtProvider;
+import com.getit.domain.auth.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final JwtProvider jwtProvider;
+  private final RefreshTokenService refreshTokenService;
   private final RefreshTokenCookie refreshTokenCookie;
   private final AuthProperties authProperties;
 
@@ -35,7 +37,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   ) throws IOException {
     CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
 
-    String refreshToken = jwtProvider.createRefreshToken(principal.getUserId());
+    // 발급 기록을 남겨야 Rotation 과 재사용 감지가 동작한다 (명세서 1.3)
+    String refreshToken = refreshTokenService.issue(principal.getUserId());
     response.addHeader(
         HttpHeaders.SET_COOKIE,
         refreshTokenCookie.create(refreshToken, jwtProvider.getRefreshTokenValidity()).toString()
