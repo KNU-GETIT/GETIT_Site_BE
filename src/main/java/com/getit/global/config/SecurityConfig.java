@@ -1,6 +1,9 @@
 package com.getit.global.config;
 
 import com.getit.domain.auth.jwt.JwtAuthenticationFilter;
+import com.getit.domain.auth.oauth2.CustomOAuth2UserService;
+import com.getit.domain.auth.oauth2.OAuth2FailureHandler;
+import com.getit.domain.auth.oauth2.OAuth2SuccessHandler;
 import com.getit.domain.auth.security.JwtAccessDeniedHandler;
 import com.getit.domain.auth.security.JwtAuthenticationEntryPoint;
 import com.getit.domain.user.entity.Role;
@@ -47,6 +50,9 @@ public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final JwtAuthenticationEntryPoint authenticationEntryPoint;
   private final JwtAccessDeniedHandler accessDeniedHandler;
+  private final CustomOAuth2UserService oAuth2UserService;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final OAuth2FailureHandler oAuth2FailureHandler;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -70,6 +76,12 @@ public class SecurityConfig {
             .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
             .requestMatchers("/api/files/**").authenticated()
             .anyRequest().authenticated())
+
+        // Google 단일 로그인. 코드 교환까지 Spring 이 처리하고 토큰 발급은 SuccessHandler 가 한다
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
+            .successHandler(oAuth2SuccessHandler)
+            .failureHandler(oAuth2FailureHandler))
 
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -27,6 +27,22 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            # 값은 .env 에서 주입한다. 커밋 금지.
+            # 미설정 상태에서도 기동은 되어야 한다 (Google 설정이 없는 팀원의 로컬 개발).
+            # 실제 로그인을 시도할 때만 실패한다.
+            client-id: ${GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${GOOGLE_CLIENT_SECRET:not-configured}
+            # openid 를 빼면 OIDC 가 아닌 일반 OAuth2 로 동작해
+            # OidcUserService 대신 CustomOAuth2UserService 가 호출된다.
+            scope:
+              - profile
+              - email
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -50,3 +66,9 @@ getit:
     secret: ${JWT_SECRET}
     access-token-validity: 30m
     refresh-token-validity: 14d
+
+  auth:
+    # 로그인 성공 후 사용자를 돌려보낼 프론트 주소
+    oauth2-redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:5173/oauth/callback}
+    # 로컬은 http 라 false. dev · prod 에서 true 로 덮어쓴다
+    refresh-cookie-secure: ${REFRESH_COOKIE_SECURE:false}
