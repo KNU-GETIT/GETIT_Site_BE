@@ -3,6 +3,7 @@ package com.getit.domain.recruitment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.getit.domain.recruitment.dto.RecruitmentScheduleResult;
 import com.getit.domain.recruitment.entity.RecruitmentSchedule;
 import com.getit.domain.recruitment.exception.RecruitmentErrorCode;
 import com.getit.domain.recruitment.repository.RecruitmentScheduleRepository;
@@ -77,9 +78,11 @@ class RecruitmentScheduleServiceTest {
           activeGeneration.getId(),
           dt(9, 1), dt(9, 30), dt(9, 1), dt(9, 10), dt(9, 15)));
 
-      RecruitmentSchedule found = recruitmentScheduleService.getSchedule();
+      RecruitmentScheduleResult found = recruitmentScheduleService.getSchedule();
 
-      assertThat(found.getGenerationId()).isEqualTo(activeGeneration.getId());
+      assertThat(found.generationId()).isEqualTo(activeGeneration.getId());
+      assertThat(found.generationNo()).isEqualTo(activeGeneration.getGenerationNo());
+      assertThat(found.year()).isEqualTo(activeGeneration.getYear());
     }
   }
 
@@ -90,11 +93,11 @@ class RecruitmentScheduleServiceTest {
     @Test
     @DisplayName("일정이 없으면 새로 생성한다")
     void createsWhenNotExists() {
-      RecruitmentSchedule saved = recruitmentScheduleService.updateSchedule(
+      RecruitmentScheduleResult saved = recruitmentScheduleService.updateSchedule(
           dt(9, 1), dt(9, 30), dt(9, 1), dt(9, 10), dt(9, 15));
 
-      assertThat(saved.getGenerationId()).isEqualTo(activeGeneration.getId());
-      assertThat(saved.getInterviewEndAt()).isEqualTo(dt(9, 30));
+      assertThat(saved.generationId()).isEqualTo(activeGeneration.getId());
+      assertThat(saved.interviewEndAt()).isEqualTo(dt(9, 30));
     }
 
     @Test
@@ -104,11 +107,11 @@ class RecruitmentScheduleServiceTest {
           activeGeneration.getId(),
           dt(9, 1), dt(9, 30), dt(9, 1), dt(9, 10), dt(9, 15)));
 
-      RecruitmentSchedule updated = recruitmentScheduleService.updateSchedule(
+      RecruitmentScheduleResult updated = recruitmentScheduleService.updateSchedule(
           dt(9, 5), dt(10, 15), dt(9, 5), dt(9, 15), dt(9, 20));
 
-      assertThat(updated.getTotalEndAt()).isEqualTo(dt(10, 15));
-      assertThat(updated.getInterviewEndAt()).isEqualTo(dt(10, 15));
+      assertThat(updated.totalEndAt()).isEqualTo(dt(10, 15));
+      assertThat(updated.interviewEndAt()).isEqualTo(dt(10, 15));
       assertThat(recruitmentScheduleRepository.count()).isEqualTo(1);
     }
 
