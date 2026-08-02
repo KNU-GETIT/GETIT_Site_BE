@@ -1,5 +1,6 @@
 package com.getit.domain.recruitment.service;
 
+import com.getit.domain.recruitment.dto.RecruitmentScheduleResult;
 import com.getit.domain.recruitment.entity.RecruitmentSchedule;
 import com.getit.domain.recruitment.exception.RecruitmentErrorCode;
 import com.getit.domain.recruitment.repository.RecruitmentScheduleRepository;
@@ -21,15 +22,17 @@ public class RecruitmentScheduleService {
   private final RecruitmentScheduleRepository recruitmentScheduleRepository;
   private final GenerationRepository generationRepository;
 
-  public RecruitmentSchedule getSchedule() {
+  public RecruitmentScheduleResult getSchedule() {
     Generation activeGeneration = findActiveGeneration();
 
-    return recruitmentScheduleRepository.findByGenerationId(activeGeneration.getId())
+    RecruitmentSchedule schedule = recruitmentScheduleRepository.findByGenerationId(activeGeneration.getId())
         .orElseThrow(() -> new BusinessException(RecruitmentErrorCode.SCHEDULE_NOT_FOUND));
+
+    return RecruitmentScheduleResult.of(activeGeneration, schedule);
   }
 
   @Transactional
-  public RecruitmentSchedule updateSchedule(
+  public RecruitmentScheduleResult updateSchedule(
       LocalDateTime totalStartAt,
       LocalDateTime totalEndAt,
       LocalDateTime documentStartAt,
@@ -40,15 +43,17 @@ public class RecruitmentScheduleService {
 
     Generation activeGeneration = findActiveGeneration();
 
-    return recruitmentScheduleRepository.findByGenerationId(activeGeneration.getId())
-        .map(schedule -> {
-          schedule.update(totalStartAt, totalEndAt, documentStartAt, documentEndAt, interviewStartAt);
-          return schedule;
+    RecruitmentSchedule schedule = recruitmentScheduleRepository.findByGenerationId(activeGeneration.getId())
+        .map(existing -> {
+          existing.update(totalStartAt, totalEndAt, documentStartAt, documentEndAt, interviewStartAt);
+          return existing;
         })
         .orElseGet(() -> recruitmentScheduleRepository.save(
             RecruitmentSchedule.create(
                 activeGeneration.getId(),
                 totalStartAt, totalEndAt, documentStartAt, documentEndAt, interviewStartAt)));
+
+    return RecruitmentScheduleResult.of(activeGeneration, schedule);
   }
 
   private Generation findActiveGeneration() {
