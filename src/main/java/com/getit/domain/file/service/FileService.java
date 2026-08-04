@@ -47,6 +47,10 @@ public class FileService {
     FileAsset file = fileAssetRepository.findById(fileId)
         .orElseThrow(() -> new BusinessException(FileErrorCode.FILE_NOT_FOUND));
 
+    if (file.isDeleted()) {
+      throw new BusinessException(FileErrorCode.FILE_NOT_FOUND);
+    }
+
     boolean isOwner = file.getUploaderId().equals(requesterId);
     if (!isOwner && requesterRole != Role.ADMIN) {
       throw new BusinessException(CommonErrorCode.NOT_RESOURCE_OWNER);
