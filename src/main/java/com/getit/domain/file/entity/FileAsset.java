@@ -85,15 +85,9 @@ public class FileAsset extends SoftDeletableEntity {
         .build();
   }
 
-  public void connect() {
-    this.status = FileStatus.CONNECTED;
-  }
+  public void connect() { this.status = FileStatus.CONNECTED; }
 
-  public void disconnect() {
-    this.status = FileStatus.PENDING;
-  }
+  public void disconnect() { this.status = FileStatus.PENDING; }
 
-  public boolean isInUse() {
-    return status == FileStatus.CONNECTED;
-  }
+  public boolean isInUse() { return status == FileStatus.CONNECTED; }
 }
