@@ -6,10 +6,11 @@ public record FileInfo(
     Long fileId,
     String url,
     String originalName,
-    String contentType
+    String contentType,
+    Long size
 ) {
 
   public static FileInfo from(FileAsset file) {
-    return new FileInfo(file.getId(), file.getUrl(), file.getOriginalName(), file.getContentType());
+    return new FileInfo(file.getId(), file.getUrl(), file.getOriginalName(), file.getContentType(), file.getSize());
   }
 }
