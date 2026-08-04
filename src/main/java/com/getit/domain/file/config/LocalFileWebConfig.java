@@ -17,7 +17,7 @@ public class LocalFileWebConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler("/files/**")
+    registry.addResourceHandler("/api/public/files/**")
         .addResourceLocations("file:" + uploadRootPath + "/");
   }
 }

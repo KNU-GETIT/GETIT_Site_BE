@@ -18,7 +18,7 @@ public class LocalFileStorage implements FileStorage {
   public LocalFileStorage(
       @Value("${getit.file.local.path:./uploads}")
       String rootPath,
-      @Value("${getit.file.local.base-url:http://localhost:8080/files}")
+      @Value("${getit.file.local.base-url:http://localhost:8080/api/public/files}")
       String baseUrl
   ) {
     this.rootDir = Path.of(rootPath).toAbsolutePath().normalize();
