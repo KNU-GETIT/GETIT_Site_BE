@@ -33,9 +33,6 @@ bin/
 .DS_Store
 Thumbs.db
 
-### 디폴트 로컬 파일 업로드 ###
-/uploads/
-
 ### 환경별 비밀 값 ###
 # 로컬 오버라이드 · 실 배포 자격증명은 커밋하지 않는다.
 src/main/resources/application-secret.yml
