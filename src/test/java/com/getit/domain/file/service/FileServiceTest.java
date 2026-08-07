@@ -99,19 +99,7 @@ class FileServiceTest {
     @Test
     @DisplayName("파일 없음: 예외 발생")
     void throwsWhenNotFound() {
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.empty());
-
-      assertThatThrownBy(() -> fileService.delete(1L, UPLOADER_ID, Role.MEMBER))
-          .isInstanceOf(BusinessException.class)
-          .hasFieldOrPropertyWithValue("errorCode", FileErrorCode.FILE_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("이미 삭제됨: 예외 발생")
-    void throwsWhenAlreadyDeleted() {
-      FileAsset file = uploadedFile();
-      file.delete();
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+      when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> fileService.delete(1L, UPLOADER_ID, Role.MEMBER))
           .isInstanceOf(BusinessException.class)
@@ -122,7 +110,7 @@ class FileServiceTest {
     @DisplayName("권한 없음: 예외 발생")
     void throwsWhenNotOwnerNorAdmin() {
       FileAsset file = uploadedFile();
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+      when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
       assertThatThrownBy(() -> fileService.delete(1L, 999L, Role.MEMBER))
           .isInstanceOf(BusinessException.class)
@@ -134,7 +122,7 @@ class FileServiceTest {
     void throwsWhenInUse() {
       FileAsset file = uploadedFile();
       file.connect();
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+      when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
       assertThatThrownBy(() -> fileService.delete(1L, UPLOADER_ID, Role.MEMBER))
           .isInstanceOf(BusinessException.class)
@@ -145,7 +133,7 @@ class FileServiceTest {
     @DisplayName("본인 소유: 정상 삭제")
     void deletesAsOwner() {
       FileAsset file = uploadedFile();
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+      when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
       fileService.delete(1L, UPLOADER_ID, Role.MEMBER);
 
@@ -156,7 +144,7 @@ class FileServiceTest {
     @DisplayName("ADMIN 대리: 정상 삭제")
     void deletesAsAdmin() {
       FileAsset file = uploadedFile();
-      when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+      when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
       fileService.delete(1L, 999L, Role.ADMIN);
 

@@ -44,12 +44,8 @@ public class FileService {
   }
 
   public void delete(Long fileId, Long requesterId, Role requesterRole) {
-    FileAsset file = fileAssetRepository.findById(fileId)
+    FileAsset file = fileAssetRepository.findByIdAndDeletedAtIsNull(fileId)
         .orElseThrow(() -> new BusinessException(FileErrorCode.FILE_NOT_FOUND));
-
-    if (file.isDeleted()) {
-      throw new BusinessException(FileErrorCode.FILE_NOT_FOUND);
-    }
 
     boolean isOwner = file.getUploaderId().equals(requesterId);
     if (!isOwner && requesterRole != Role.ADMIN) {

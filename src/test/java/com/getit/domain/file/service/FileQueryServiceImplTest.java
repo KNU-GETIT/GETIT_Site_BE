@@ -34,7 +34,7 @@ class FileQueryServiceImplTest {
   @DisplayName("존재하는 파일: FileInfo 반환")
   void returnsFileInfo() {
     FileAsset file = uploadedFile();
-    when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+    when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
     FileInfo info = fileQueryService.findById(1L);
 
@@ -46,7 +46,7 @@ class FileQueryServiceImplTest {
   @Test
   @DisplayName("존재하지 않는 파일: 예외 발생")
   void throwsWhenNotFound() {
-    when(fileAssetRepository.findById(1L)).thenReturn(Optional.empty());
+    when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> fileQueryService.findById(1L))
         .isInstanceOf(BusinessException.class)
@@ -57,7 +57,7 @@ class FileQueryServiceImplTest {
   @DisplayName("여러 fileId: 한 번에 조회")
   void findsAllByIds() {
     FileAsset file = uploadedFile();
-    when(fileAssetRepository.findAllByIdIn(List.of(1L))).thenReturn(List.of(file));
+    when(fileAssetRepository.findAllByIdInAndDeletedAtIsNull(List.of(1L))).thenReturn(List.of(file));
 
     List<FileInfo> infos = fileQueryService.findAllByIds(List.of(1L));
 

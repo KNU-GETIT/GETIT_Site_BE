@@ -34,7 +34,7 @@ class FileConnectionServiceImplTest {
   @DisplayName("connect: CONNECTED로 전이")
   void connectsFile() {
     FileAsset file = uploadedFile();
-    when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+    when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
     fileConnectionService.connect(1L);
 
@@ -46,7 +46,7 @@ class FileConnectionServiceImplTest {
   void disconnectsFile() {
     FileAsset file = uploadedFile();
     file.connect();
-    when(fileAssetRepository.findById(1L)).thenReturn(Optional.of(file));
+    when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(file));
 
     fileConnectionService.disconnect(1L);
 
@@ -56,7 +56,7 @@ class FileConnectionServiceImplTest {
   @Test
   @DisplayName("존재하지 않는 파일 연결: 예외 발생")
   void throwsWhenConnectingMissingFile() {
-    when(fileAssetRepository.findById(1L)).thenReturn(Optional.empty());
+    when(fileAssetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> fileConnectionService.connect(1L))
         .isInstanceOf(BusinessException.class)

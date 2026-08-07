@@ -22,7 +22,7 @@ public class FileConnectionServiceImpl implements FileConnectionService {
   public void disconnect(Long fileId) { findFile(fileId).disconnect(); }
 
   private FileAsset findFile(Long fileId) {
-    return fileAssetRepository.findById(fileId)
+    return fileAssetRepository.findByIdAndDeletedAtIsNull(fileId)
         .orElseThrow(() -> new BusinessException(FileErrorCode.FILE_NOT_FOUND));
   }
 }

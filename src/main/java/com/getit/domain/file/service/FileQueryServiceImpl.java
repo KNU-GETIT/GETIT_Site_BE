@@ -18,14 +18,14 @@ public class FileQueryServiceImpl implements FileQueryService {
 
   @Override
   public FileInfo findById(Long fileId) {
-    FileAsset file = fileAssetRepository.findById(fileId)
+    FileAsset file = fileAssetRepository.findByIdAndDeletedAtIsNull(fileId)
         .orElseThrow(() -> new BusinessException(FileErrorCode.FILE_NOT_FOUND));
     return FileInfo.from(file);
   }
 
   @Override
   public List<FileInfo> findAllByIds(List<Long> fileIds) {
-    return fileAssetRepository.findAllByIdIn(fileIds).stream()
+    return fileAssetRepository.findAllByIdInAndDeletedAtIsNull(fileIds).stream()
         .map(FileInfo::from)
         .toList();
   }
