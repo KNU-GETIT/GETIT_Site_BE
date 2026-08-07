@@ -72,6 +72,14 @@ getit:
     access-token-validity: 30m
     refresh-token-validity: 14d
 
+  file:
+    local:
+      # 업로드 파일을 저장할 경로. LocalFileWebConfig 가 이 경로를
+      # /api/public/files/** 로 서빙한다.
+      path: ${FILE_LOCAL_PATH:./uploads}
+      # 업로드 결과로 내려줄 URL 의 앞부분. 위 서빙 경로와 반드시 일치해야 한다.
+      base-url: ${FILE_BASE_URL:http://localhost:8080/api/public/files}
+
   auth:
     # 로그인 성공 후 사용자를 돌려보낼 프론트 주소
     oauth2-redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:5173/oauth/callback}

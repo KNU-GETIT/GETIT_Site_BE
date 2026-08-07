@@ -1,11 +1,13 @@
 package com.getit.domain.auth.security;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.getit.domain.auth.jwt.JwtProvider;
 import com.getit.domain.user.entity.Role;
+import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,9 +21,12 @@ import org.springframework.test.web.servlet.ResultMatcher;
 /**
  * SecurityConfig 의 URL 인가 규칙 검증. (설계 명세서 1.1)
  *
- * <p>아직 컨트롤러가 없으므로 인가를 통과한 요청은 404 가 된다.
- * 즉 404 는 "인가는 통과했다" 는 뜻이고, 401/403 이면 인가 단계에서 막힌 것이다.
- * 컨트롤러가 생기면 이 테스트의 기대값을 실제 응답으로 바꾸면 된다.
+ * <p>검증 대상은 <b>인가 통과 여부</b>지 응답 내용이 아니다.
+ * 401·403 이면 인가 단계에서 막힌 것이고, 그 외 상태 코드는 전부 통과한 것이다.
+ * 매핑이 없으면 404, 메서드가 다르면 405 가 되는데 둘 다 인가는 통과한 상태다.
+ *
+ * <p>기대값을 404 로 못박지 않는 이유는 A/B 가 컨트롤러를 추가할 때마다
+ * 이 테스트가 깨지기 때문이다. 실제로 file 컨트롤러가 생기면서 한 번 깨졌다.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,9 +44,14 @@ class AuthorizationRuleTest {
   @Autowired
   private JwtProvider jwtProvider;
 
-  /** 인가를 통과했음을 뜻한다. 매핑된 컨트롤러가 없어 404 가 된다. */
+  /** 인가를 통과했음을 뜻한다. 401·403 만 아니면 통과다. */
   private ResultMatcher passedAuthorization() {
-    return status().isNotFound();
+    return result -> {
+      int actual = result.getResponse().getStatus();
+      assertThat(actual)
+          .as("인가를 통과하면 401·403 이 아니어야 한다 (실제 %d)", actual)
+          .isNotIn(HttpStatus.UNAUTHORIZED.value(), HttpStatus.FORBIDDEN.value());
+    };
   }
 
   @Nested

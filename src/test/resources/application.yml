@@ -45,6 +45,12 @@ getit:
     access-token-validity: 30m
     refresh-token-validity: 14d
 
+  file:
+    local:
+      # 저장소를 더럽히지 않도록 임시 디렉터리를 쓴다.
+      path: ${java.io.tmpdir}/getit-test-uploads
+      base-url: http://localhost:8080/api/public/files
+
   auth:
     oauth2-redirect-uri: http://localhost:5173/oauth/callback
     refresh-cookie-secure: false
