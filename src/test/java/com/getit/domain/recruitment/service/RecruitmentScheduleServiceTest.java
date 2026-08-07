@@ -146,6 +146,18 @@ class RecruitmentScheduleServiceTest {
     }
 
     @Test
+    @DisplayName("면접 시작일이 총 모집 종료일보다 늦으면 검증 실패한다")
+    void rejectsInterviewStartAfterTotalEnd() {
+      // interviewEndAt 은 totalEndAt(9/30) 으로 강제 동기화된다.
+      // interviewStartAt(10/5) 이 이보다 늦으면 종료일 < 시작일인 깨진 일정이 된다.
+      assertThatThrownBy(() -> recruitmentScheduleService.updateSchedule(
+          dt(9, 1), dt(9, 30), dt(9, 1), dt(9, 10), dt(10, 5)))
+          .isInstanceOf(BusinessException.class)
+          .extracting("errorCode")
+          .isEqualTo(CommonErrorCode.VALIDATION_FAILED);
+    }
+
+    @Test
     @DisplayName("활성 기수가 없으면 검증 이후 예외가 발생한다")
     void throwsWhenNoActiveGeneration() {
       activeGeneration.deactivate();

@@ -81,5 +81,12 @@ public class RecruitmentScheduleService {
       throw new BusinessException(
           CommonErrorCode.VALIDATION_FAILED, "면접 시작일은 서류 마감일 이후여야 합니다.");
     }
+    // interviewEndAt 은 totalEndAt 으로 강제 동기화된다. 이 검증이 없으면
+    // interviewStartAt 이 totalEndAt 보다 늦어 interviewEndAt < interviewStartAt 인
+    // 깨진 일정이 저장된다.
+    if (interviewStartAt.isAfter(totalEndAt)) {
+      throw new BusinessException(
+          CommonErrorCode.VALIDATION_FAILED, "면접 시작일은 총 모집 종료일보다 늦을 수 없습니다.");
+    }
   }
 }
