@@ -40,3 +40,6 @@ src/main/resources/application-local-*.yml
 .env
 *.pem
 *.p12
+
+# 로컬 파일 업로드 저장소
+uploads/
